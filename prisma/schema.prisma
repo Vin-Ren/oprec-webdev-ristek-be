@@ -59,7 +59,7 @@ model Tryout {
   name                String
   description         String               @default("")
   questionsOrder      String? // Should exist if shuffled=false, will constrain this on backend
-  shuffled            Boolean              @default(false)
+  shuffled            Boolean              @default(true)
   opensAt             DateTime             @default(now())
   closesAt            DateTime             @default(now())
   duration            Int                  @default(0)

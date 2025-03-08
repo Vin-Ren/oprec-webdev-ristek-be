@@ -12,10 +12,11 @@ authRouter.get("/github", async (req, res) => {
   res.redirect(redirect_uri);
 });
 
-authRouter.get('/github/callback', (async (req, res) => {
+authRouter.get('/github/callback', async (req, res) => {
   const code = req.query.code as string;
   if (!code) {
-    return res.status(400).send('Code not provided');
+    res.status(400).send('Code not provided');
+    return 
   }
 
   try {
@@ -82,7 +83,7 @@ authRouter.get('/github/callback', (async (req, res) => {
     console.error('Error during GitHub OAuth process:', error);
     res.status(500).send('Authentication failed');
   }
-}) as express.RequestHandler);
+});
 
 authRouter.get('/user', async (req, res) => {
   if (req.session.user) {

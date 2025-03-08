@@ -28,14 +28,15 @@ async function main() {
 
   const tryout = await db.tryout.create({
     data: {
-      name: 'test',
-      ownerId: admin.id
+      name: 'tes2t',
+      ownerId: admin.id,
+      description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Architecto dolorem possimus maiores distinctio itaque, fugiat sequi facere rem molestias est error magni sint, ipsa necessitatibus. Esse voluptate voluptatum maxime odio."
     }
   })
 
   const question1 = await db.question.create({
     data: {
-      content: "Apakah nilai 1+1?",
+      content: "Apakah nilai 1+3?",
       type: "MULTIPLE_CHOICE",
       weight: 2,
       tryoutId: tryout.id
@@ -44,22 +45,23 @@ async function main() {
 
   const choices1 = await db.choice.createManyAndReturn({
     data: [
-      { content: '11', questionId: question1.id },
-      { content: '121', questionId: question1.id },
-      { content: '2', questionId: question1.id }
+      { content: '33', questionId: question1.id },
+      { content: '122', questionId: question1.id },
+      { content: '44', questionId: question1.id },
+      { content: '4', questionId: question1.id }
     ]
   })
 
   const answer1 = await db.answer.create({
     data: {
       questionId: question1.id,
-      choiceId: choices1[2].id
+      choiceId: choices1[3].id
     }
   })
 
   const question2 = await db.question.create({
     data: {
-      content: "Apakah nilai 3^2?",
+      content: "Apakah nilai 3^3?",
       type: "SHORT_QUESTION",
       weight: 3,
       tryoutId: tryout.id
@@ -69,7 +71,7 @@ async function main() {
   const answer2 = await db.answer.create({
     data: {
       questionId: question2.id,
-      content: "9"
+      content: "27"
     }
   })
 
@@ -94,7 +96,7 @@ async function main() {
       id: tryout.id
     },
     data: {
-      questionsOrder: `${question3.id},${question1.id},${question2.id}`
+      questionsOrder: `${question2.id},${question3.id},${question1.id}`
     }
   })
 
@@ -107,7 +109,7 @@ async function main() {
         createMany: {
           data: [
             {
-              questionIndex: 0,
+              questionIndex: 1,
               content: "Vektor adalah anggota dari suatu ruang V yang memenuhi kesepuluh aksioma dalam operasi penjumlahan dan perkalian skalar."
             },
             {

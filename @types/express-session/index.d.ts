@@ -8,6 +8,6 @@ declare module 'express-session' {
       githubId: number | null,
       role: "Admin" | "User"
     };
-    userId?: string
+    userId: string
   }
 }

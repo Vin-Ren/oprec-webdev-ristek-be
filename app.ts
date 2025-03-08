@@ -7,6 +7,7 @@ import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 
 import authRouter from "./routes/auth";
 import db from "./lib/prisma";
+import tryoutRouter from "./routes/tryout";
 
 const app = express();
 
@@ -36,6 +37,8 @@ if (app.get('env') === 'production') {
 app.use(session(sessionConf));
 
 app.use('/auth', authRouter);
+app.use('/tryout', tryoutRouter);
+
 
 app.get('/test', async (req, res) => {
   res.json({ 'hello': 'world' })
