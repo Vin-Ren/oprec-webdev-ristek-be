@@ -52,8 +52,9 @@ enum TryoutVisibility {
 
 model Tryout {
   id                  String               @id @default(cuid())
-  name                String               @default("Sample")
-  questionsOrder      String               @default("")
+  name                String
+  description         String               @default("")
+  questionsOrder      String?
   shuffled            Boolean              @default(false)
   opensAt             DateTime             @default(now())
   closesAt            DateTime             @default(now())
@@ -62,7 +63,7 @@ model Tryout {
   owner               User                 @relation(fields: [ownerId], references: [id])
   visibility          TryoutVisibility     @default(PRIVATE)
   passphrase          String               @default("")
-  editable            Boolean
+  editable            Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   questions           Question[]
@@ -83,7 +84,7 @@ model ActiveTryoutSession {
 
 enum QuestionType {
   MULTIPLE_CHOICE // TRUE_FALSE_QUESTION is a subspace of MULTIPLE_CHOICE
-  SHORT_QUESTIONS
+  SHORT_QUESTION
   ESSAY
 }
 
@@ -93,7 +94,7 @@ model Question {
   type      QuestionType
   tryoutId  String
   tryout    Tryout       @relation(fields: [tryoutId], references: [id])
-  choices   Choice? // Essay or Short questions doesn't have choices
+  choices   Choice[] // Essay or Short questions doesn't have choices
   Answer    Answer?
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
@@ -105,22 +106,24 @@ model Choice {
   content    String
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
-
-  @@unique([questionId(sort: Asc)])
+  Answer     Answer?
 }
 
 model Answer {
   id         Int      @id @default(autoincrement())
-  content    String
+  content    String? // Exists if the question type is not multiple choices
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
+  choiceId   Int? // Only exists if the question is multiple choices
+  choice     Choice?  @relation(fields: [choiceId], references: [id])
 
   @@unique([questionId(sort: Asc)])
+  @@unique([choiceId])
 }
 
 model Submission {
   id             String    @id @default(cuid())
-  questionsOrder String    @default("")
+  questionsOrder String?
   userId         String
   user           User      @relation(fields: [userId], references: [id])
   tryoutId       String
