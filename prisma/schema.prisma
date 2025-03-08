@@ -41,7 +41,7 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId])
+  @@unique([userId(sort: Asc)])
 }
 
 enum TryoutVisibility {
@@ -106,7 +106,7 @@ model Choice {
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
 
-  @@unique([questionId])
+  @@unique([questionId(sort: Asc)])
 }
 
 model Answer {
@@ -115,7 +115,7 @@ model Answer {
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
 
-  @@unique([questionId])
+  @@unique([questionId(sort: Asc)])
 }
 
 model Submission {
@@ -138,5 +138,5 @@ model Flag {
   submissionId String
   submission   Submission @relation(fields: [submissionId], references: [id])
 
-  @@unique([questionId, submissionId])
+  @@unique([submissionId(sort: Asc), questionId(sort: Asc)])
 }
