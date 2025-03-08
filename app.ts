@@ -3,7 +3,10 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import cookieParser from "cookie-parser";
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
+
 import authRouter from "./routes/auth";
+import db from "./lib/prisma";
 
 const app = express();
 
@@ -16,6 +19,14 @@ const sessionConf = {
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false, httpOnly: true },
+  store: new PrismaSessionStore(
+    db,
+    {
+      checkPeriod: (parseInt(process.env.SESSION_POOLING_INTERVAL as string || "120")) * 1000,  // Remove expired sessions every 2 minutes
+      dbRecordIdIsSessionId: true,
+      dbRecordIdFunction: undefined,
+    }
+  ),
 }
 
 if (app.get('env') === 'production') {

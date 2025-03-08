@@ -2,6 +2,12 @@ import 'express-session';
 
 declare module 'express-session' {
   interface SessionData {
-    user?: any;
+    user: {
+      id: string,
+      username: string,
+      githubId: number | null,
+      role: "Admin" | "User"
+    };
+    userId?: string
   }
 }

@@ -22,7 +22,7 @@ model User {
   id                  String               @id @default(cuid())
   username            String
   passwordHash        String               @default("")
-  githubId            Int                  @default(-1)
+  githubId            Int?
   role                UserRoles            @default(User)
   sessions            Session? // Should be one-to-one
   tryouts             Tryout[]
@@ -30,16 +30,20 @@ model User {
   submissions         Submission[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+
+  @@unique([githubId])
 }
 
 model Session {
-  sid       String   @id
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  sid       String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
   expires   DateTime @default(now())
   data      String   @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  expiresAt DateTime @default(now())
 
   @@unique([userId(sort: Asc)])
 }

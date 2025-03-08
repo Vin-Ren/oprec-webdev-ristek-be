@@ -1,5 +1,7 @@
 import axios from "axios";
 import express, { NextFunction, Request, Response, Router } from "express";
+import db from "../lib/prisma";
+import { GithubOAuthData } from "../@types/GithubOAuth";
 
 
 const authRouter = Router()
@@ -38,8 +40,41 @@ authRouter.get('/github/callback', (async (req, res) => {
     });
 
     // Store user data in session
-    req.session.user = userResponse.data;
-    console.log(req.session.user)
+    const githubData: GithubOAuthData = userResponse.data;
+
+    let userData = await db.user.findUnique({
+      where: {
+        githubId: githubData.id
+      }
+    })
+    if (userData === null) {
+      userData = await db.user.create({
+        data: {
+          username: githubData.login,
+          githubId: githubData.id
+        }
+      })
+    }
+
+    req.session.userId = userData.id;
+    req.session.user = {
+      id: userData.id,
+      username: userData.username,
+      role: userData.role,
+      githubId: userData.githubId
+    };
+    const _ = await db.session.upsert({
+      where: {
+        id: req.session.id
+      }, update: {
+        userId: userData.id
+      },
+      create: {
+        id: req.session.id,
+        sid: req.session.id,
+        userId: userData.id
+      }
+    })
 
     // Redirect to frontend with user data
     res.redirect(process.env.POST_LOGIN_REDIRECT_URI as string);
@@ -49,7 +84,7 @@ authRouter.get('/github/callback', (async (req, res) => {
   }
 }) as express.RequestHandler);
 
-authRouter.get('/user', (req, res) => {
+authRouter.get('/user', async (req, res) => {
   if (req.session.user) {
     res.json({ user: req.session.user });
   } else {
@@ -57,13 +92,22 @@ authRouter.get('/user', (req, res) => {
   }
 });
 
-authRouter.post('/logout', (req: Request, res: Response, next: NextFunction) => {
-  req.session.destroy(err => {
+authRouter.post('/logout', async (req: Request, res: Response, next: NextFunction) => {
+  req.session.destroy(async err => {
     if (err) {
       console.error('Logout error:', err);
       return next(err);
     }
 
+    try {
+      const _ = await db.session.delete({
+        where: {
+          id: req.cookies['connect.sid'] || ''
+        }
+      })
+    } catch (error) {
+      console.log("error when deleting auth entries in db", error)
+    }
     res.clearCookie('connect.sid');
     res.json({ message: 'Logged out successfully' });
   });
