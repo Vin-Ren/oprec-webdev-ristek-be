@@ -68,7 +68,7 @@ model Tryout {
   owner               User                 @relation(fields: [ownerId], references: [id])
   visibility          TryoutVisibility     @default(PRIVATE)
   passphrase          String               @default("")
-  editable            Boolean              @default(false)
+  editable            Boolean              @default(true)
   questions           Question[]
   activeTryoutSession ActiveTryoutSession?
   submissions         Submission[]
