@@ -118,7 +118,7 @@ authRouter.post('/logout', async (req: Request, res: Response, next: NextFunctio
         }
       })
     } catch (error) {
-      console.log("error when deleting auth entries in db", error)
+
     }
     res.clearCookie('connect.sid');
     res.json({ message: 'Logged out successfully' });

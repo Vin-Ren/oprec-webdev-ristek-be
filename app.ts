@@ -1,5 +1,5 @@
 /// <reference path="./@types/express-session/index.d.ts" />
-import express from "express";
+import express, { Router } from "express";
 import cors from "cors";
 import session from "express-session";
 import cookieParser from "cookie-parser";
@@ -34,15 +34,14 @@ if (app.get('env') === 'production') {
   app.set('trust proxy', 1) // trust first proxy
   sessionConf.cookie.secure = true // serve secure cookies
 }
+
 app.use(session(sessionConf));
 
-app.use('/auth', authRouter);
-app.use('/tryout', tryoutRouter);
+const v1Router = Router();
+v1Router.use('/auth', authRouter);
+v1Router.use('/tryout', tryoutRouter);
 
 
-app.get('/test', async (req, res) => {
-  res.json({ 'hello': 'world' })
-})
-
+app.use('/v1', v1Router)
 
 export default app;
