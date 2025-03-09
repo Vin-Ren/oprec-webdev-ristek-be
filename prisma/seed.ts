@@ -58,13 +58,14 @@ async function main() {
   const candidateOwners = [admin.id, admin2.id, user1.id, user2.id]
 
   const tryoutCount = randomInt(3, 10);
-  console.log({ tryoutCount })
+
   for (let i = 0; i < tryoutCount; i++) {
     const tryout = await db.tryout.create({
       data: {
         name: faker.book.title(),
         ownerId: candidateOwners[randomInt(candidateOwners.length)],
         description: faker.lorem.sentences(3),
+        duration: faker.number.int({ min: 0, max: 86400 }),
         shuffled: faker.number.int({ min: 0, max: 1 }) === 1
       }
     })
@@ -97,7 +98,6 @@ async function main() {
 
       for (let k = 0; k < submissionCount; k++) { // 20% Chance
         submissionFlag[k].push(randomInt(3) === 0)
-        console.log(submissionFlag[k][submissionFlag[k].length - 1])
       }
 
       if (qType === "MULTIPLE_CHOICE") {
