@@ -113,11 +113,11 @@ async function main() {
               content: "Vektor adalah anggota dari suatu ruang V yang memenuhi kesepuluh aksioma dalam operasi penjumlahan dan perkalian skalar."
             },
             {
-              questionIndex: 1,
+              questionIndex: 2,
               choiceId: choices1[2].id
             },
             {
-              questionIndex: 2,
+              questionIndex: 0,
               content: "9"
             }
           ]
@@ -135,15 +135,15 @@ async function main() {
         createMany: {
           data: [
             {
-              questionIndex: 0,
+              questionIndex: 1,
               content: ":O Widih"
             },
             {
-              questionIndex: 1,
+              questionIndex: 2,
               choiceId: choices1[1].id
             },
             {
-              questionIndex: 2,
+              questionIndex: 0,
               content: "8"
             }
           ]

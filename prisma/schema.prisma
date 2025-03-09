@@ -21,6 +21,7 @@ enum UserRoles {
 model User {
   id                  String               @id @default(cuid())
   username            String
+  avatarUrl           String               @default("")
   passwordHash        String               @default("")
   githubId            Int?
   role                UserRoles            @default(User)
@@ -95,7 +96,7 @@ enum QuestionType {
 model Question {
   id        Int          @id @default(autoincrement())
   content   String
-  weight    Int          @default(1) // Contribution to total score
+  weight    Float        @default(1) // Contribution to total score
   type      QuestionType
   tryoutId  String
   tryout    Tryout       @relation(fields: [tryoutId], references: [id])
@@ -143,6 +144,7 @@ model Submission {
 model SubmittedAnswer {
   id            Int        @id @default(autoincrement())
   content       String?
+  weight        Float      @default(0) // Contribution to total score
   choiceId      Int?
   choice        Choice?    @relation(fields: [choiceId], references: [id])
   submissionId  String
