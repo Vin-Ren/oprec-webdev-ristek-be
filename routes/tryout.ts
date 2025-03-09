@@ -1,11 +1,10 @@
 /// <reference path="../@types/express-session/index.d.ts" />
 import { Router } from "express";
 import { Prisma, TryoutVisibility } from '@prisma/client';
-import { z } from "zod";
 
 import db from "../lib/prisma";
 import zodSchemaValidator from "../lib/zodSchemaValidator";
-import { CreateTryoutParams, createTryoutSchema, UpdateTryoutParams, updateTryoutSchema } from "../schemas/tryout";
+import { CreateTryoutParams, createTryoutSchema, UpdateTryoutParams, updateTryoutSchema } from "../@types/tryout";
 
 const tryoutRouter = Router()
 
