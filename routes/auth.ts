@@ -1,7 +1,7 @@
 import axios from "axios";
 import express, { NextFunction, Request, Response, Router } from "express";
 import db from "../lib/prisma";
-import { GithubOAuthData } from "../@types/GithubOAuth";
+import GithubOAuthData from "../@types/GithubOAuth";
 
 
 const authRouter = Router()
@@ -52,7 +52,17 @@ authRouter.get('/github/callback', async (req, res) => {
       userData = await db.user.create({
         data: {
           username: githubData.login,
+          githubId: githubData.id,
+          avatarUrl: githubData.avatar_url
+        }
+      })
+    } else {
+      userData = await db.user.update({
+        where: {
           githubId: githubData.id
+        },
+        data: {
+          avatarUrl: githubData.avatar_url
         }
       })
     }
@@ -61,6 +71,7 @@ authRouter.get('/github/callback', async (req, res) => {
     req.session.user = {
       id: userData.id,
       username: userData.username,
+      avatarUrl: userData.avatarUrl,
       role: userData.role,
       githubId: userData.githubId
     };
@@ -68,7 +79,7 @@ authRouter.get('/github/callback', async (req, res) => {
       where: {
         id: req.session.id
       }, update: {
-        userId: userData.id
+        userId: userData.id,
       },
       create: {
         id: req.session.id,

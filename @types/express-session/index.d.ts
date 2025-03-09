@@ -5,6 +5,7 @@ declare module 'express-session' {
     user: {
       id: string,
       username: string,
+      avatarUrl: string,
       githubId: number | null,
       role: "Admin" | "User"
     };
