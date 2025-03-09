@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import db from "../lib/prisma";
 import zodSchemaValidator from "../lib/zodSchemaValidator";
+import { CreateTryoutParams, createTryoutSchema, UpdateTryoutParams, updateTryoutSchema } from "../schemas/tryout";
 
 const tryoutRouter = Router()
 
@@ -56,38 +57,6 @@ tryoutRouter.get('/:id/details', async (req, res) => {
 })
 
 
-interface CreateTryoutParams {
-  name: string,
-  description?: string,
-  questionsOrder?: string,
-  shuffled?: boolean,
-  opensAt?: Date,
-  closesAt?: Date,
-  duration?: number,
-  visibility?: TryoutVisibility,
-  passphrase?: string
-}
-
-
-const createTryoutSchema = z.object({
-  name: z.string().min(3).max(50),
-  description: z.string().optional(),
-  questionsOrder: z.string().optional(),
-  shuffled: z.boolean().optional(),
-  opensAt: z
-    .string()
-    .transform((val) => new Date(val))
-    .refine((date) => !isNaN(date.getTime()), { message: "Invalid date format" }),
-  closesAt: z
-    .string()
-    .transform((val) => new Date(val))
-    .refine((date) => !isNaN(date.getTime()), { message: "Invalid date format" }),
-  duration: z.number().int().min(0).max(86400), // Max duration is 1 day.
-  visibility: z.nativeEnum(TryoutVisibility),
-  passphrase: z.string().max(100).optional()
-});
-
-
 tryoutRouter.post('/', zodSchemaValidator(createTryoutSchema), async (req, res) => {
   const {
     name,
@@ -120,37 +89,6 @@ tryoutRouter.post('/', zodSchemaValidator(createTryoutSchema), async (req, res) 
 })
 
 
-interface UpdateTryoutParams {
-  name: string,
-  description?: string,
-  questionsOrder?: string,
-  shuffled?: boolean,
-  opensAt?: Date,
-  closesAt?: Date,
-  duration?: number,
-  visibility?: TryoutVisibility,
-  passphrase?: string
-}
-
-const updateTryoutSchema = z.object({
-  name: z.string().min(3).max(50),
-  description: z.string().optional(),
-  questionsOrder: z.string().optional(),
-  shuffled: z.boolean().optional(),
-  opensAt: z
-    .string()
-    .transform((val) => new Date(val))
-    .refine((date) => !isNaN(date.getTime()), { message: "Invalid date format" }),
-  closesAt: z
-    .string()
-    .transform((val) => new Date(val))
-    .refine((date) => !isNaN(date.getTime()), { message: "Invalid date format" }),
-  duration: z.number().int().min(0).max(86400), // Max duration is 1 day.
-  visibility: z.nativeEnum(TryoutVisibility),
-  passphrase: z.string().max(100).optional()
-});
-
-
 tryoutRouter.put('/:id', zodSchemaValidator(updateTryoutSchema), async (req, res) => {
   const { id } = req.params;
   if (!id) {
@@ -177,7 +115,6 @@ tryoutRouter.put('/:id', zodSchemaValidator(updateTryoutSchema), async (req, res
       editable: true
     }
   })
-  console.log({ id, b: req.session.user })
 
   if (isEditable === null) {
     res.status(403).json({ error: "Either the tryout is fictictuous, the tryout is not yours, or it is no longer editable." });
@@ -228,7 +165,6 @@ tryoutRouter.delete('/:id', async (req, res) => {
   res.json({ message: "Success!" })
   return
 })
-
 
 
 export default tryoutRouter;
