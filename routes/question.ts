@@ -10,7 +10,7 @@ import { Prisma } from "@prisma/client";
 const questionRouter = Router()
 
 questionRouter.get('/', async (req, res) => {
-  if (!req.session.userId) {
+  if (req.session.user?.role === 'User') {
     res.status(403);
     return;
   }
@@ -28,7 +28,7 @@ questionRouter.get('/:tryoutId', async (req, res) => {
       select: { ownerId: true }
     })
 
-    if (tryout?.ownerId != req.session.userId && req.session.user?.role! === 'Admin') {
+    if (tryout?.ownerId != req.session.userId && req.session.user?.role! !== 'Admin') {
       res.status(403)
       return
     }
