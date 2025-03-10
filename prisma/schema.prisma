@@ -99,7 +99,7 @@ model Question {
   weight    Float        @default(1) // Contribution to total score
   type      QuestionType
   tryoutId  String
-  tryout    Tryout       @relation(fields: [tryoutId], references: [id])
+  tryout    Tryout       @relation(fields: [tryoutId], references: [id], onDelete: Cascade)
   choices   Choice[] // Essay or Short questions doesn't have choices
   answer    Answer?
   createdAt DateTime     @default(now())
@@ -110,7 +110,7 @@ model Choice {
   id              Int               @id @default(autoincrement())
   content         String
   questionId      Int
-  question        Question          @relation(fields: [questionId], references: [id])
+  question        Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
   answer          Answer?
   SubmittedAnswer SubmittedAnswer[]
 }
@@ -119,9 +119,9 @@ model Answer {
   id         Int      @id @default(autoincrement())
   content    String? // Exists if the question type is not multiple choices
   questionId Int
-  question   Question @relation(fields: [questionId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   choiceId   Int? // Only exists if the question is multiple choices
-  choice     Choice?  @relation(fields: [choiceId], references: [id])
+  choice     Choice?  @relation(fields: [choiceId], references: [id], onDelete: Cascade)
 
   @@unique([questionId(sort: Asc)])
   @@unique([choiceId])
@@ -146,9 +146,9 @@ model SubmittedAnswer {
   content       String?
   weight        Float      @default(0) // Contribution to total score
   choiceId      Int?
-  choice        Choice?    @relation(fields: [choiceId], references: [id])
+  choice        Choice?    @relation(fields: [choiceId], references: [id], onDelete: Cascade)
   submissionId  String
-  submission    Submission @relation(fields: [submissionId], references: [id])
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   questionIndex Int
 
   @@unique([submissionId, questionIndex])
@@ -157,7 +157,7 @@ model SubmittedAnswer {
 model Flag {
   id            Int        @id @default(autoincrement())
   submissionId  String
-  submission    Submission @relation(fields: [submissionId], references: [id])
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   questionIndex Int
 
   @@unique([submissionId(sort: Asc), questionIndex])
