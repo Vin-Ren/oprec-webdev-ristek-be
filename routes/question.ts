@@ -83,9 +83,20 @@ questionRouter.post('/', zodSchemaValidator(createQuestionSchema), async (req, r
   try {
     const data: CreateQuestionParams = req.body
 
-    const question = db.question.create({
+    const bindedTryout = await db.tryout.findUnique({
+      where: { id: data.tryoutId },
+      select: { ownerId: true }
+    })
+
+    if (bindedTryout?.ownerId != req.session.userId && req.session.user?.role === 'User') {
+      res.sendStatus(403)
+      return
+    }
+
+    const question = await db.question.create({
       data
     })
+
     res.json({ question })
     return
   } catch (error) {
@@ -99,13 +110,27 @@ questionRouter.post('/', zodSchemaValidator(createQuestionSchema), async (req, r
 
 questionRouter.put('/:id', zodSchemaValidator(updateQuestionSchema), async (req, res) => {
   try {
-    const where = await getQuestionByIdSchema.parseAsync(req.params)
+    const { id } = await getQuestionByIdSchema.parseAsync(req.params)
     const data: UpdateQuestionParams = req.body
 
-    const question = db.question.update({
-      where,
+    let validateUser = (req.session.user?.role === 'Admin') ? {} : {
+      tryout: {
+        ownerId: req.session.userId
+      }
+    }
+
+    const question = await db.question.update({
+      where: {
+        id,
+        ...validateUser
+      },
       data
     })
+
+    if (!question) {
+      res.sendStatus(404)
+      return
+    }
     res.json({ question })
     return
   } catch (error) {
@@ -119,11 +144,24 @@ questionRouter.put('/:id', zodSchemaValidator(updateQuestionSchema), async (req,
 
 questionRouter.delete('/:id', async (req, res) => {
   try {
-    const where = await getQuestionByIdSchema.parseAsync(req.params)
+    const { id } = await getQuestionByIdSchema.parseAsync(req.params)
+
+    let validateUser = (req.session.user?.role === 'Admin') ? {} : {
+      tryout: {
+        ownerId: req.session.userId
+      }
+    }
 
     const question = db.question.delete({
-      where
+      where: {
+        id,
+        ...validateUser
+      }
     })
+    if (!question) {
+      res.sendStatus(404)
+      return
+    }
     res.json({ question })
     return
   } catch (error) {
