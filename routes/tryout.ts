@@ -4,42 +4,52 @@ import { Prisma, TryoutVisibility } from '@prisma/client';
 
 import db from "../lib/prisma";
 import zodSchemaValidator from "../lib/zodSchemaValidator";
-import { CreateTryoutParams, createTryoutSchema, UpdateTryoutParams, updateTryoutSchema } from "../@types/tryout";
+import { CreateTryoutParams, createTryoutSchema, UpdateTryoutParams, updateTryoutSchema } from "../schemas/tryout";
 
 const tryoutRouter = Router()
 
 tryoutRouter.get('/', async (req, res) => {
-  const tryouts = await db.tryout.findMany({
-    where: {
-      visibility: "PUBLIC",
-    },
-    select: {
-      id: true,
-      name: true,
-      opensAt: true,
-      closesAt: true,
-      duration: true
+  try {
+    const tryouts = await db.tryout.findMany({
+      where: {
+        visibility: "PUBLIC",
+      },
+      select: {
+        id: true,
+        name: true,
+        opensAt: true,
+        closesAt: true,
+        duration: true
+      }
+    });
+    res.json({ tryouts });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      res.sendStatus(500)
     }
-  });
-  res.json({ tryouts });
-  return;
+  }
 })
 
 tryoutRouter.get('/mine', async (req, res) => {
-  const tryouts = await db.tryout.findMany({
-    where: {
-      ownerId: req.session.userId || ""
-    },
-    select: {
-      id: true,
-      name: true,
-      opensAt: true,
-      closesAt: true,
-      duration: true
+  try {
+    const tryouts = await db.tryout.findMany({
+      where: {
+        ownerId: req.session.userId || ""
+      },
+      select: {
+        id: true,
+        name: true,
+        opensAt: true,
+        closesAt: true,
+        duration: true
+      }
+    });
+    res.json({ tryouts });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      res.sendStatus(500)
     }
-  });
-  res.json({ tryouts });
-  return;
+  }
 })
 
 tryoutRouter.get('/:id/details', async (req, res) => {
@@ -103,6 +113,8 @@ tryoutRouter.get('/:id/details', async (req, res) => {
     if (error instanceof Prisma.PrismaClientKnownRequestError && (error as Prisma.PrismaClientKnownRequestError).code === 'P2025') {
       res.sendStatus(404)
       return
+    } else {
+      res.sendStatus(500)
     }
     console.log(error)
   }
@@ -110,112 +122,127 @@ tryoutRouter.get('/:id/details', async (req, res) => {
 
 
 tryoutRouter.post('/', zodSchemaValidator(createTryoutSchema), async (req, res) => {
-  const {
-    name,
-    description = "",
-    questionsOrder,
-    shuffled = false,
-    opensAt = new Date(),
-    closesAt = new Date(),
-    duration = 0,
-    visibility = TryoutVisibility.PRIVATE,
-    passphrase = ""
-  }: CreateTryoutParams = req.body;
-
-  const tryout = await db.tryout.create({
-    data: {
+  try {
+    const {
       name,
-      description,
+      description = "",
       questionsOrder,
-      shuffled,
-      opensAt,
-      closesAt,
-      duration,
-      ownerId: (req.session.userId as string),
-      visibility,
-      passphrase
+      shuffled = false,
+      opensAt = new Date(),
+      closesAt = new Date(),
+      duration = 0,
+      visibility = TryoutVisibility.PRIVATE,
+      passphrase = ""
+    }: CreateTryoutParams = req.body;
+
+    const tryout = await db.tryout.create({
+      data: {
+        name,
+        description,
+        questionsOrder,
+        shuffled,
+        opensAt,
+        closesAt,
+        duration,
+        ownerId: (req.session.userId as string),
+        visibility,
+        passphrase
+      }
+    })
+    res.json({ tryout })
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      res.status(500)
     }
-  })
-  res.json({ tryout })
-  return;
+  }
 })
 
 
 tryoutRouter.put('/:id', zodSchemaValidator(updateTryoutSchema), async (req, res) => {
-  const { id } = req.params;
-  if (!id) {
-    res.status(404).json({ error: "404 Not found." })
-    return
-  }
-
-  const {
-    name,
-    description = "",
-    questionsOrder,
-    shuffled = false,
-    opensAt = new Date(),
-    closesAt = new Date(),
-    duration = 0,
-    visibility = TryoutVisibility.PRIVATE,
-    passphrase = ""
-  }: UpdateTryoutParams = req.body;
-
-  const isEditable = await db.tryout.findUnique({
-    where: {
-      id,
-      ownerId: (req.session.userId as string),
-      editable: true
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(404).json({ error: "404 Not found." })
+      return
     }
-  })
 
-  if (isEditable === null) {
-    res.status(403).json({ error: "Either the tryout is fictictuous, the tryout is not yours, or it is no longer editable." });
-    return;
-  }
-
-  const tryout = await db.tryout.update({
-    where: { id },
-    data: {
+    const {
       name,
-      description,
+      description = "",
       questionsOrder,
-      shuffled,
-      opensAt,
-      closesAt,
-      duration,
-      ownerId: (req.session.userId as string),
-      visibility,
-      passphrase
+      shuffled = false,
+      opensAt = new Date(),
+      closesAt = new Date(),
+      duration = 0,
+      visibility = TryoutVisibility.PRIVATE,
+      passphrase = ""
+    }: UpdateTryoutParams = req.body;
+
+    const isEditable = await db.tryout.findUnique({
+      where: {
+        id,
+        ownerId: (req.session.userId as string),
+        editable: true
+      }
+    })
+
+    if (isEditable === null) {
+      res.status(403).json({ error: "Either the tryout is fictictuous, the tryout is not yours, or it is no longer editable." });
+      return;
     }
-  })
-  res.json({ tryout })
-  return;
+
+    const tryout = await db.tryout.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        questionsOrder,
+        shuffled,
+        opensAt,
+        closesAt,
+        duration,
+        ownerId: (req.session.userId as string),
+        visibility,
+        passphrase
+      }
+    })
+    res.json({ tryout })
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      res.status(500)
+    }
+  }
 })
 
 tryoutRouter.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-  if (!id) {
-    res.status(404).json({ error: "404 Not found." })
-    return
-  }
-
-  const isEditable = await db.tryout.findUnique({
-    where: {
-      id,
-      ownerId: (req.session.userId as string)
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(404).json({ error: "404 Not found." })
+      return
     }
-  })
 
-  if (isEditable === null) {
-    res.status(403).json({ error: "Either the tryout is fictictuous or the tryout is not yours." });
-    return;
+    const isEditable = await db.tryout.findUnique({
+      where: {
+        id,
+        ownerId: (req.session.userId as string)
+      }
+    })
+
+    if (isEditable === null) {
+      res.status(403).json({ error: "Either the tryout is fictictuous or the tryout is not yours." });
+      return;
+    }
+
+    const _ = await db.tryout.delete({
+      where: { id }
+    })
+    res.json({ message: "Success!" })
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      res.status(500)
+    }
   }
-
-  const _ = await db.tryout.delete({
-    where: { id }
-  })
-  res.json({ message: "Success!" })
-  return
 })
 
 

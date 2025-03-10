@@ -8,6 +8,7 @@ import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import authRouter from "./routes/auth";
 import db from "./lib/prisma";
 import tryoutRouter from "./routes/tryout";
+import questionRouter from "./routes/question";
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use(session(sessionConf));
 const v1Router = Router();
 v1Router.use('/auth', authRouter);
 v1Router.use('/tryout', tryoutRouter);
+v1Router.use('/question', questionRouter)
 
 
 app.use('/v1', v1Router)
