@@ -7,7 +7,7 @@ pnpm install
 ```
 
 Then, copy the sample [.env.sample](./.env.sample) to `.env` in this directory and change the configurations as needed.
-To get a github OAuth API key, [go here](https://github.com/settings/developers), make sure that the callback url there matches the env variable `GITHUB_REDIRECT_URI`.
+To get a github OAuth API key, [go here](https://github.com/settings/developers), make sure that the callback url there matches the env variable `GITHUB_REDIRECT_URI`. The given values (except api keys, client id, and secrets) are valid to be used in development.
 
 
 Setup the database with:
