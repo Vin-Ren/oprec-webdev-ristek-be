@@ -9,6 +9,7 @@ import authRouter from "./routes/auth";
 import db from "./lib/prisma";
 import tryoutRouter from "./routes/tryout";
 import questionRouter from "./routes/question";
+import choiceRouter from "./routes/choice";
 
 const app = express();
 
@@ -42,6 +43,7 @@ const v1Router = Router();
 v1Router.use('/auth', authRouter);
 v1Router.use('/tryout', tryoutRouter);
 v1Router.use('/question', questionRouter)
+v1Router.use('/choice', choiceRouter)
 
 
 app.use('/v1', v1Router)
