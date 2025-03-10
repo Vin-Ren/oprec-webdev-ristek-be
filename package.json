@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.ts"
+    "dev": "nodemon index.ts",
+    "build": "tsc",
+    "preview": "node dist/index.js"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
