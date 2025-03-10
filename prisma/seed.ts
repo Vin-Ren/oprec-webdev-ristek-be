@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 import db from "../lib/prisma";
 import { randomInt } from 'crypto';
-import { Question, QuestionType, Submission } from '@prisma/client';
+import { Question, QuestionType, Submission, TryoutVisibility } from '@prisma/client';
 
 // Function to concatenate array elements separated by commas
 function concatArray<T>(arr: T[]) {
@@ -66,7 +66,8 @@ async function main() {
         ownerId: candidateOwners[randomInt(candidateOwners.length)],
         description: faker.lorem.sentences(3),
         duration: faker.number.int({ min: 0, max: 86400 }),
-        shuffled: faker.number.int({ min: 0, max: 1 }) === 1
+        shuffled: faker.number.int({ min: 0, max: 1 }) === 1,
+        visibility: ["PRIVATE", "UNLISTED", "PUBLIC"][randomInt(3)] as TryoutVisibility
       }
     })
 

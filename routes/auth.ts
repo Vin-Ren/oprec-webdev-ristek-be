@@ -8,7 +8,12 @@ const authRouter = Router()
 
 
 authRouter.get("/github", async (req, res) => {
-  const redirect_uri = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&scope=read:user&prompt=select_account`;
+  const { select_account = false } = req.query
+
+  let redirect_uri = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&scope=read:user`;
+  if (select_account) {
+    redirect_uri += "&prompt=select_account";
+  }
   res.redirect(redirect_uri);
 });
 

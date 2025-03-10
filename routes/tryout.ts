@@ -10,6 +10,26 @@ const tryoutRouter = Router()
 
 tryoutRouter.get('/', async (req, res) => {
   const tryouts = await db.tryout.findMany({
+    where: {
+      visibility: "PUBLIC",
+    },
+    select: {
+      id: true,
+      name: true,
+      opensAt: true,
+      closesAt: true,
+      duration: true
+    }
+  });
+  res.json({ tryouts });
+  return;
+})
+
+tryoutRouter.get('/mine', async (req, res) => {
+  const tryouts = await db.tryout.findMany({
+    where: {
+      ownerId: req.session.userId || ""
+    },
     select: {
       id: true,
       name: true,
@@ -30,9 +50,33 @@ tryoutRouter.get('/:id/details', async (req, res) => {
       return
     }
 
-    const tryoutTransact = db.tryout.findUniqueOrThrow({
-      where: { id },
+    const publicTryoutTransact = db.tryout.findUniqueOrThrow({
+      where: {
+        id,
+        OR: [
+          {
+            visibility: {
+              not: "PRIVATE"
+            },
+          },
+          { ownerId: req.session.userId || '' }
+        ]
+      },
+      omit: {
+        ownerId: true,
+        passphrase: true,
+        shuffled: true,
+        questionsOrder: true,
+        editable: true
+      }
     });
+
+    const ownerTryoutTransact = db.tryout.findUnique({
+      where: {
+        id,
+        ownerId: req.session.userId
+      }
+    })
 
     const totalAggTransact = db.question.aggregate({
       where: { tryoutId: id },
@@ -42,9 +86,18 @@ tryoutRouter.get('/:id/details', async (req, res) => {
       }
     });
 
-    const [tryout, totalAgg] = await db.$transaction([tryoutTransact, totalAggTransact]);
+    const [tryout, tryoutExtended, totalAgg] = await db.$transaction([
+      publicTryoutTransact, ownerTryoutTransact, totalAggTransact
+    ]);
 
-    res.json({ tryout: { ...tryout, questionCount: totalAgg._count, totalScore: totalAgg._sum.weight } });
+    res.json({
+      tryout: {
+        ...tryout,
+        ...(tryoutExtended || {}),
+        questionCount: totalAgg._count,
+        totalScore: totalAgg._sum.weight
+      }
+    });
     return;
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && (error as Prisma.PrismaClientKnownRequestError).code === 'P2025') {
