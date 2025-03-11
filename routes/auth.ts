@@ -82,9 +82,10 @@ authRouter.get('/github/callback', async (req, res) => {
     };
     const _ = await db.session.upsert({
       where: {
-        id: req.session.id
-      }, update: {
         userId: userData.id,
+      }, update: {
+        id: req.session.id,
+        sid: req.session.id
       },
       create: {
         id: req.session.id,

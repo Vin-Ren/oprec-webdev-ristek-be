@@ -17,11 +17,19 @@ app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-const sessionConf = {
+if (app.get('env') === 'production') {
+  app.set('trust proxy', 1) // trust first proxy
+}
+
+app.use(session({
   secret: process.env.SESSION_SECRET || '',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, httpOnly: true },
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: "none",
+  },
   store: new PrismaSessionStore(
     db,
     {
@@ -30,14 +38,7 @@ const sessionConf = {
       dbRecordIdFunction: undefined,
     }
   ),
-}
-
-if (app.get('env') === 'production') {
-  app.set('trust proxy', 1) // trust first proxy
-  sessionConf.cookie.secure = true // serve secure cookies
-}
-
-app.use(session(sessionConf));
+}));
 
 const v1Router = Router();
 v1Router.use('/auth', authRouter);
