@@ -4,7 +4,7 @@ import { Prisma, TryoutVisibility } from '@prisma/client';
 
 import db from "../lib/prisma";
 import zodSchemaValidator from "../lib/zodSchemaValidator";
-import { CreateTryoutParams, createTryoutSchema, UpdateTryoutParams, updateTryoutSchema } from "../schemas/tryout";
+import { CreateTryoutParams, createTryoutSchema, SearchTryoutParams, searchTryoutSchema, UpdateTryoutParams, updateTryoutSchema } from "../schemas/tryout";
 
 const tryoutRouter = Router()
 
@@ -35,6 +35,58 @@ tryoutRouter.get('/mine', async (req, res) => {
     const tryouts = await db.tryout.findMany({
       where: {
         ownerId: req.session.userId || ""
+      },
+      select: {
+        id: true,
+        name: true,
+        opensAt: true,
+        closesAt: true,
+        duration: true
+      }
+    });
+    res.json({ tryouts });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      res.sendStatus(500)
+    }
+  }
+})
+
+tryoutRouter.get('/search', zodSchemaValidator(searchTryoutSchema), async (req, res) => {
+  try {
+    const searchParams: SearchTryoutParams = req.body
+    const selectors = [];
+    if (searchParams.name) {
+      selectors.push({
+        name: {
+          contains: searchParams.name
+        }
+      })
+    }
+
+    if (searchParams.afterDate) {
+      selectors.push({
+        createdAt: {
+          gt: searchParams.afterDate
+        }
+      })
+    }
+
+    if (searchParams.beforeDate) {
+      selectors.push({
+        createdAt: {
+          lt: searchParams.beforeDate
+        }
+      })
+    }
+
+    const tryouts = await db.tryout.findMany({
+      where: {
+        OR: [
+          (req.session.user?.role === 'Admin') ? {} : { visibility: { not: "PRIVATE" } },
+          { ownerId: req.session.userId }
+        ],
+        AND: selectors
       },
       select: {
         id: true,
